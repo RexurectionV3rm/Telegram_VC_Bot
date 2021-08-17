@@ -47,7 +47,7 @@ async def repo(_, message):
 async def joinvc(_, message, manual=False):
     if "call" in db:
         return await message.reply_text(
-            "__**Bot Is Already In The VC**__"
+            "__**Bot già nella voice chat!**__"
         )
     await message.delete()
     os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
@@ -72,11 +72,11 @@ async def joinvc(_, message, manual=False):
         except ChatAdminRequired:
             del db["call"]
             return await message.reply_text(
-                "Make me admin with message delete and vc manage permission"
+                "Fammi admin con il permesso di eliminare messaggi e gestire la voice chat!"
             )
     await message.reply_text(
-        "__**Joined The Voice Chat.**__ \n\n**Note:** __If you can't hear anything,"
-        + " Send /leavevc and then /joinvc again.__"
+        "__**Sono entrato nella chat vocale.**__ \n\n**ATTENZIONE:** __Se non senti niente,"
+        + " scrivi /leavevc e di nuovo /joinvc.__"
     )
     await message.delete()
 
@@ -91,7 +91,7 @@ async def leavevc(_, message):
         await db["call"].leave_current_group_call()
         await db["call"].stop()
         del db["call"]
-    await message.reply_text("__**Left The Voice Chat**__")
+    await message.reply_text("__**Sono uscito dalla chat vocale**__")
     await message.delete()
 
 
@@ -101,11 +101,11 @@ async def leavevc(_, message):
     & filters.chat(CHAT_ID)
 )
 async def volume_bot(_, message):
-    usage = "**Usage:**\n/volume [1-200]"
+    usage = "**E.X:**\n/volume [1-200]"
     if len(message.command) != 2:
         return await message.reply_text(usage)
     if "call" not in db:
-        return await message.reply_text("VC isn't started")
+        return await message.reply_text("Starta la voice chat prima di runnarmi")
     vc = db["call"]
     volume = int(message.text.split(None, 1)[1])
     if (volume < 1) or (volume > 200):
@@ -114,7 +114,7 @@ async def volume_bot(_, message):
         await vc.set_my_volume(volume=volume)
     except ValueError:
         return await message.reply_text(usage)
-    await message.reply_text(f"**Volume Set To {volume}**")
+    await message.reply_text(f"**Volume settato a {volume}**")
 
 
 @app.on_message(
@@ -124,14 +124,14 @@ async def volume_bot(_, message):
 )
 async def pause_song_func(_, message):
     if "call" not in db:
-        return await message.reply_text("**VC isn't started**")
+        return await message.reply_text("**Starta la voice chat prima di runnarmi**")
     if "paused" in db:
         if db.get("paused"):
-            return await message.reply_text("**Already paused**")
+            return await message.reply_text("**Già in pausa.**")
     db["paused"] = True
     db["call"].pause_playout()
     await message.reply_text(
-        "**Paused The Music, Send `/resume` To Resume.**"
+        "**Ho messo in pausa la musica scrivi `/resume` per riprendere.**"
     )
 
 
@@ -149,7 +149,7 @@ async def resume_song(_, message):
     db["paused"] = False
     db["call"].resume_playout()
     await message.reply_text(
-        "**Resumed, Send `/pause` To Pause The Music.**"
+        "**Perfetto, scrivi `/pause` per fare di nuovo pausa.**"
     )
 
 
@@ -158,16 +158,16 @@ async def resume_song(_, message):
 )
 async def skip_func(_, message):
     if "queue" not in db:
-        await message.reply_text("**VC isn't started**")
+        await message.reply_text("**Starta la voice chat prima di runnarmi**")
         return await message.delete()
     queue = db["queue"]
     if queue.empty() and ("playlist" not in db or not db["playlist"]):
         await message.reply_text(
-            "__**Queue Is Empty, Just Like Your Life.**__"
+            "__**Queue vuota.**__"
         )
         return await message.delete()
     db["skipped"] = True
-    await message.reply_text("__**Skipped!**__")
+    await message.reply_text("__**Bene, skippata!**__")
     await message.delete()
 
 
@@ -179,7 +179,7 @@ async def queuer(_, message):
     global running
     try:
         usage = """
-**Usage:**
+**E.X:**
 __/play Song_Name__
 __/play youtube/saavn Song_Name__
 __/play Reply_On_Audio__"""
@@ -193,7 +193,7 @@ __/play Reply_On_Audio__"""
             await message.delete()
             if "call" not in db:
                 return await message.reply_text(
-                    "**Use /joinvc First!**"
+                    "**Usa /joinvc prima!**"
                 )
             await message.delete()
             if message.reply_to_message:
@@ -202,7 +202,7 @@ __/play Reply_On_Audio__"""
                     song_name = message.reply_to_message.audio.title
                 else:
                     return await message.reply_text(
-                        "**Reply to a telegram audio file**"
+                        "**Rispondi ad un'audio di telegram**"
                     )
                 await message.delete()
             else:
@@ -219,7 +219,7 @@ __/play Reply_On_Audio__"""
             if "queue" not in db:
                 db["queue"] = asyncio.Queue()
             if not db["queue"].empty() or db.get("running"):
-                await message.reply_text("__**Added To Queue.__**")
+                await message.reply_text("__**Aggiunto alla playlist.__**")
             await message.delete()
 
             await db["queue"].put(
@@ -250,7 +250,7 @@ async def queue_list(_, message):
     queue = db["queue"]
     if queue.empty():
         return await message.reply_text(
-            "__**Queue Is Empty, Just Like Your Life.**__"
+            "__**Queue vuota.**__"
         )
     if (
         len(message.text.split()) > 1
@@ -270,7 +270,7 @@ async def queue_list(_, message):
             text += song["query"] + "\n"
     if len(text) > 4090:
         return await message.reply_text(
-            f"**There are {queue.qsize()} songs in queue.**"
+            f"**Ci sono {queue.qsize()} canzoni nella playlist.**"
         )
     await message.reply_text(text)
 
@@ -312,14 +312,14 @@ async def start_queue(message=None):
 async def clear_queue(_, message):
     global db
     if "call" not in db:
-        return await message.reply_text("**VC isn't started**")
+        return await message.reply_text("**Starta la voice chat prima di runnarmi**")
     if ("queue" not in db or db["queue"].empty()) and (
         "playlist" not in db or not db["playlist"]
     ):
-        return await message.reply_text("**Queue Already is Empty**")
+        return await message.reply_text("**La playlist è già vuota**")
     db["playlist"] = False
     db["queue"] = asyncio.Queue()
-    await message.reply_text("**Successfully Cleared the Queue**")
+    await message.reply_text("**Ho svuotato la playlist**")
 
 
 @app.on_message(
@@ -334,15 +334,15 @@ async def playlist(_, message: Message, redirected=False):
         raw_playlist = message.text[10:]
     else:
         usage = """
-**Usage: Same as /play
-Example:
+**E.X: Uguale a /play
+E.X:
     __**/playlist song_name1
     song_name2
     youtube song_name3**__"""
 
         return await message.reply_text(usage)
     if "call" not in db:
-        return await message.reply_text("**Use /joinvc First!**")
+        return await message.reply_text("**Usa /joinvc prima!**")
     if "playlist" not in db:
         db["playlist"] = False
     if "running" in db and db.get("running"):
@@ -368,7 +368,7 @@ Example:
         )
     if not redirected:
         db["running"] = True
-        await message.reply_text("**Playlist Started.**")
+        await message.reply_text("**Playlist startata.**")
         await start_queue(message)
 
 
