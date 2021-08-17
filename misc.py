@@ -1,4 +1,4 @@
-HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
+HELP_TEXT = """__**Io faccio bang bang con la musica.**__
 
 **/skip** __Skip The Current Playing Music.__
 **/play** __Service_Or_Default (Services: youtube/saavn, Default: youtube) Song_Name | Reply_To_Audio__
